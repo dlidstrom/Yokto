@@ -5,7 +5,9 @@ This is a simple library for inversion of control, using C++0x features.
 # Inversion of Control
 Have a look at [Inversion of Control](http://en.wikipedia.org/wiki/Inversion_of_control) for an introduction to the concept.
 
-## Examples
+## Quick Start
+
+### Registering a factory
 
 Here's a sample code showing how to register a factory function in the container:
 
@@ -23,6 +25,8 @@ Here's a sample code showing how to register a factory function in the container
 The above code shows how to register a factory function that simply returns
 an instance of the Foo class.
 
+### Using the container as a service locator
+
 Now an example of how to resolve an instance:
 
       // RegisteredInstanceIsResolved
@@ -36,6 +40,9 @@ Now an example of how to resolve an instance:
       }
 
 This example actually shows how to register a pre-created instance, instead of the factory function.
-Note that `container->Resolve<IFoo>()` will return a `std::shared_ptr<IFoo>`.
+Note that `container->Resolve<IFoo>()` will return a `std::shared_ptr<IFoo>`. The usage shown above,
+where the container is used directly, is usually called [Service Locator](http://martinfowler.com/articles/injection.html#UsingAServiceLocator).
+
+### More examples
 
 For more examples, have a look at the library [tests](http://github.com/dlidstrom/Yokto/blob/master/Yokto/Yokto.cpp).
