@@ -44,6 +44,7 @@ namespace Yokto
       template<class T>
       void Register(std::function<T* (Container c)> f)
       {
+         Register(std::string(), f);
       }
 
       template<class T>

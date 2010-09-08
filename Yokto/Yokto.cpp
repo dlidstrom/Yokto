@@ -46,21 +46,32 @@ int _tmain(int argc, _TCHAR* argv[])
          {
          }
       }
+      // RegistersDelegateForType()
+      {
+         auto container = Container::Create();
+         container->Register<IFoo>([](Container) { return new Foo; });
+
+         auto foo = container->Resolve<IFoo>();
+
+         assert(foo);
+         assert(std::dynamic_pointer_cast<IFoo>(foo));
+         assert(std::dynamic_pointer_cast<Foo>(foo));
+      }
       // RegistersNamedInstances()
-		{
-			auto container = Container::Create();
-         container->Register<IFoo>("foo", [](Container c) { return new Foo; });
-         container->Register<IFoo>("foo2", [](Container c) { return new Foo2; });
+      {
+         auto container = Container::Create();
+         container->Register<IFoo>("foo", [](Container) { return new Foo; });
+         container->Register<IFoo>("foo2", [](Container) { return new Foo2; });
 
-			auto foo = container->ResolveNamed<IFoo>("foo");
-			auto foo2 = container->ResolveNamed<IFoo>("foo2");
+         auto foo = container->ResolveNamed<IFoo>("foo");
+         auto foo2 = container->ResolveNamed<IFoo>("foo2");
 
-			assert(foo!=foo2);
-			assert(std::dynamic_pointer_cast<IFoo>(foo));
-			assert(std::dynamic_pointer_cast<IFoo>(foo2));
-			assert(std::dynamic_pointer_cast<Foo>(foo));
+         assert(foo!=foo2);
+         assert(std::dynamic_pointer_cast<IFoo>(foo));
+         assert(std::dynamic_pointer_cast<IFoo>(foo2));
+         assert(std::dynamic_pointer_cast<Foo>(foo));
          assert(std::dynamic_pointer_cast<Foo2>(foo2));
-		}
+      }
 
       std::cout << "Tests finished successfully in ";
    }
