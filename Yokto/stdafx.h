@@ -20,3 +20,5 @@
 #include <map>
 #include <boost/any.hpp>
 #include <iostream>
+#include <string>
+#include <boost/progress.hpp>

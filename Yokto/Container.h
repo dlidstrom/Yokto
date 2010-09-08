@@ -2,70 +2,91 @@
 
 namespace Yokto
 {
-	class Container;
-	typedef std::shared_ptr<Container> ContainerPtr;
+   class Container;
+   typedef std::shared_ptr<Container> ContainerPtr;
 
-	struct null_deleter
-	{
-		void operator()(void*) const {}
-	};
+   struct null_deleter
+   {
+      void operator()(void*) const {}
+   };
 
-	class Container
-	{
-		struct type_info_lt
-		{
-			bool operator()(const std::type_info& t1, const std::type_info& t2) const
-			{
-				return t1.before(t2) < 0;
-			}
-		};
+   struct ResolutionException : std::runtime_error
+   {
+      ResolutionException()
+         : std::runtime_error("Could not resolve type")
+      {}
+   };
 
-		typedef std::reference_wrapper<const std::type_info> type_info_ref;
-		typedef std::function<boost::any (Container)> Factory;
-		typedef std::map<type_info_ref, Factory, type_info_lt> Factories;
-		Factories factories;
+   class Container
+   {
+      typedef std::reference_wrapper<const std::type_info> type_info_ref;
+      typedef std::pair<std::string, type_info_ref> Key;
 
-		template<class T>
-		static std::function<std::shared_ptr<T> (Container)> make_wrapper(T* t)
-		{
-			auto f = [t](Container c) { return std::shared_ptr<T>(t, null_deleter()); };
-			return f;
-		}
+      struct key_lt
+      {
+         bool operator()(const Key& k1, const Key& k2) const
+         {
+            return k1.first<k2.first || (k1.first==k2.first && k1.second.get().before(k2.second.get()));
+         }
+      };
 
-	public:
+      typedef std::function<boost::any (Container)> Factory;
+      typedef std::map<Key, Factory, key_lt> Factories;
+      Factories factories;
 
-		static ContainerPtr Create()
-		{
-			return ContainerPtr(new Container());
-		}
+   public:
 
-		template<class T>
-		void Register(std::function<T* (Container c)> f)
-		{
-		}
+      static ContainerPtr Create()
+      {
+         return ContainerPtr(new Container());
+      }
 
-		template<class T>
-		void Register(T* t)
-		{
-			Factories::value_type v = std::make_pair(std::cref(typeid(T)), make_wrapper<T>(t));
-			factories.insert(v);
-		}
+      template<class T>
+      void Register(std::function<T* (Container c)> f)
+      {
+      }
 
-		template<class T>
-		std::shared_ptr<T> Resolve()
-		{
-			typedef std::shared_ptr<T> Type;
+      template<class T>
+      void Register(T* t)
+      {
+         Factory f = [t](Container c) { return std::shared_ptr<T>(t, null_deleter()); };
+         Factories::key_type k = std::make_pair(std::string(), std::cref(typeid(T)));
+         factories.insert(std::make_pair(k, f));
+      }
 
-			Type result;
+      template<class T>
+      void Register(const std::string& name, std::function<T* (Container c)> f)
+      {
+         Factory wrapped = [f, this](Container c) { return std::shared_ptr<T>(f(*this)); };
+         Factories::key_type k = std::make_pair(name, std::cref(typeid(T)));
+         factories.insert(std::make_pair(k, wrapped));
+      }
 
-			Factories::const_iterator it = factories.find(typeid(T));
-			if (it != factories.end())
-			{
-				Factory f = it->second;
-				result = boost::any_cast<Type>(f(*this));
-			}
+      template<class T>
+      std::shared_ptr<T> Resolve()
+      {
+         return ResolveNamed<T>(std::string());
+      }
 
-			return result;
-		}
-	};
+      template<class T>
+      std::shared_ptr<T> ResolveNamed(const std::string& name)
+      {
+         typedef std::shared_ptr<T> Type;
+
+         Type result;
+
+         Factories::key_type k = std::make_pair(name, std::cref(typeid(T)));
+         Factories::const_iterator it = factories.lower_bound(k);
+         if (it != factories.end())
+         {
+            Factory f = it->second;
+            result = boost::any_cast<Type>(f(*this));
+         }
+
+         if (!result)
+            throw ResolutionException();
+
+         return result;
+      }
+   };
 }
