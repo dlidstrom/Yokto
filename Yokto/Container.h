@@ -5,11 +5,16 @@ namespace Yokto
 	class Container;
 	typedef std::shared_ptr<Container> ContainerPtr;
 
+	struct null_deleter
+	{
+		void operator()(void*) const {}
+	};
+
 	class Container
 	{
 		struct type_info_lt
 		{
-			bool operator()(const std::type_info& t1, const std::type_info& t2)
+			bool operator()(const std::type_info& t1, const std::type_info& t2) const
 			{
 				return t1.before(t2) < 0;
 			}
@@ -19,6 +24,13 @@ namespace Yokto
 		typedef std::function<boost::any (Container)> Factory;
 		typedef std::map<type_info_ref, Factory, type_info_lt> Factories;
 		Factories factories;
+
+		template<class T>
+		static std::function<std::shared_ptr<T> (Container)> make_wrapper(T* t)
+		{
+			auto f = [t](Container c) { return std::shared_ptr<T>(t, null_deleter()); };
+			return f;
+		}
 
 	public:
 
@@ -35,7 +47,7 @@ namespace Yokto
 		template<class T>
 		void Register(T* t)
 		{
-			Factories::value_type v = std::make_pair(std::cref(typeid(T)), [t](Container c) { return t; });
+			Factories::value_type v = std::make_pair(std::cref(typeid(T)), make_wrapper<T>(t));
 			factories.insert(v);
 		}
 
@@ -43,8 +55,17 @@ namespace Yokto
 		std::shared_ptr<T> Resolve()
 		{
 			typedef std::shared_ptr<T> Type;
+
+			Type result;
+
 			Factories::const_iterator it = factories.find(typeid(T));
-			return it != factories.end() ? boost::any_cast<Type>(it->second(*this)) : Type();
+			if (it != factories.end())
+			{
+				Factory f = it->second;
+				result = boost::any_cast<Type>(f(*this));
+			}
+
+			return result;
 		}
 	};
 }
