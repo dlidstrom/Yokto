@@ -6,3 +6,5 @@ Yokto.suo
 ipch
 Release
 Yokto.opensdf
+*.opensdf
+*.sdf

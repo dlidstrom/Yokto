@@ -3,6 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Yokto", "Yokto\Yokto.vcxproj", "{F477D5C8-6B4B-41EE-ABAC-FCE3FE16BDF4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest++.vs2010", "UnitTest++\UnitTest++.vs2010.vcxproj", "{64A4FEFE-0461-4E95-8CC1-91EF5F57DBC6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Yokto.Test", "Yokto.Test\Yokto.Test.vcxproj", "{0D0E855F-BA64-453A-AC84-5207CFEA1AB0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F477D5C8-6B4B-41EE-ABAC-FCE3FE16BDF4} = {F477D5C8-6B4B-41EE-ABAC-FCE3FE16BDF4}
+		{64A4FEFE-0461-4E95-8CC1-91EF5F57DBC6} = {64A4FEFE-0461-4E95-8CC1-91EF5F57DBC6}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +21,14 @@ Global
 		{F477D5C8-6B4B-41EE-ABAC-FCE3FE16BDF4}.Debug|Win32.Build.0 = Debug|Win32
 		{F477D5C8-6B4B-41EE-ABAC-FCE3FE16BDF4}.Release|Win32.ActiveCfg = Release|Win32
 		{F477D5C8-6B4B-41EE-ABAC-FCE3FE16BDF4}.Release|Win32.Build.0 = Release|Win32
+		{64A4FEFE-0461-4E95-8CC1-91EF5F57DBC6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{64A4FEFE-0461-4E95-8CC1-91EF5F57DBC6}.Debug|Win32.Build.0 = Debug|Win32
+		{64A4FEFE-0461-4E95-8CC1-91EF5F57DBC6}.Release|Win32.ActiveCfg = Release|Win32
+		{64A4FEFE-0461-4E95-8CC1-91EF5F57DBC6}.Release|Win32.Build.0 = Release|Win32
+		{0D0E855F-BA64-453A-AC84-5207CFEA1AB0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0D0E855F-BA64-453A-AC84-5207CFEA1AB0}.Debug|Win32.Build.0 = Debug|Win32
+		{0D0E855F-BA64-453A-AC84-5207CFEA1AB0}.Release|Win32.ActiveCfg = Release|Win32
+		{0D0E855F-BA64-453A-AC84-5207CFEA1AB0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

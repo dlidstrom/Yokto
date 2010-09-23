@@ -7,7 +7,18 @@
 using namespace Yokto;
 
 struct IFoo { virtual ~IFoo() {} };
-class Foo : public IFoo {};
+class Foo : public IFoo
+{
+public:
+
+   Foo() {}
+
+   Foo(std::string s)
+      : value(s)
+   {}
+
+   std::string value;
+};
 class Foo2 : public IFoo {};
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -19,11 +30,6 @@ int _tmain(int argc, _TCHAR* argv[])
    {
       boost::progress_timer timer;
 
-      // ShouldRegister
-      {
-         auto container = Container::Create();
-         container->Register<IFoo>([](Container) { return new Foo; });
-      }
       // RegisteredInstanceIsResolved
       {
          auto container = Container::Create();
@@ -71,6 +77,15 @@ int _tmain(int argc, _TCHAR* argv[])
          assert(std::dynamic_pointer_cast<IFoo>(foo2));
          assert(std::dynamic_pointer_cast<Foo>(foo));
          assert(std::dynamic_pointer_cast<Foo2>(foo2));
+      }
+      // RegistersWithCtorArguments
+      {
+         auto container = Container::Create();
+         container->Register<IFoo, std::string>([](Container, const std::string& s) { return new Foo(s); });
+
+			auto foo = container->Resolve<IFoo, std::string>("value");
+
+			assert(foo->value=="value");
       }
 
       std::cout << "Tests finished successfully in ";

@@ -30,7 +30,8 @@ namespace Yokto
          }
       };
 
-      typedef std::function<boost::any (Container)> Factory;
+      //typedef std::function<boost::any (Container)> Factory;
+      typedef boost::any Factory;
       typedef std::map<Key, Factory, key_lt> Factories;
       Factories factories;
 
@@ -63,10 +64,21 @@ namespace Yokto
          factories.insert(std::make_pair(k, wrapped));
       }
 
+      template<class T, class C>
+      void Register(std::function<T* (Container c, const C& p)> f)
+      {
+      }
+
       template<class T>
       std::shared_ptr<T> Resolve()
       {
          return ResolveNamed<T>(std::string());
+      }
+
+      template<class T, class C>
+      std::shared_ptr<T> Resolve(const C& c)
+      {
+         return ResolveNamed<T>(std::string(), c);
       }
 
       template<class T>
@@ -81,13 +93,20 @@ namespace Yokto
          if (it != factories.end())
          {
             Factory f = it->second;
-            result = boost::any_cast<Type>(f(*this));
+            auto factory = boost::any_cast<std::function<T* (Container)>>(f);
+            result.reset(factory(*this));
          }
 
          if (!result)
             throw ResolutionException();
 
          return result;
+      }
+
+      template<class T, class C>
+      std::shared_ptr<T> ResolveNamed(const std::string& name, const C&)
+      {
+         return ResolveNamed<T>(name);
       }
    };
 }
